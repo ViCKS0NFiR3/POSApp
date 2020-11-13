@@ -3,8 +3,11 @@ import axios from 'axios';
 import Product from './Product';
 import { useSelector, useDispatch } from 'react-redux';
 import * as action from './actions';
+import history from './History';
+import Modal from '@material-ui/core/Modal';
 
 function App(props) {
+
   const postRequest = (path) => {
     //if (sku.length >= 12 ){
     const sku = props.store.getState().skuInput;
@@ -46,14 +49,20 @@ function App(props) {
       dispatch(action.sub_quantity());
     }
   };
+  
+  const prodOnSubmit = (product, quantity, itemList) => {
+    if(Object.keys(product).length !== 0){
+      submitProcess(product, quantity, itemList);
+    } else {
+      productModalOpen(true);
+    }
+  }
 
-  const submit = (product, quantity, itemList) => {
+  const submitProcess = (product, quantity, itemList) => {
     const itemEntry = {...product};
     itemEntry.price = parseFloat(itemEntry.price.replace('Php ','')) * quantity;
     itemEntry.quantity = quantity;
     itemEntry.sku = product.sku;
-    console.log(`SKU: ${product.sku}`);
-    console.log(`ITEM ENTRY: ${itemEntry.sku}`);
     for (let i=0; i <= itemList.length; i++){
       console.log(itemList)
       if (itemList.length === 0){
@@ -69,36 +78,62 @@ function App(props) {
         break;
       }
     };
+    clearOnSubmit();
+  };
+
+  const clearOnSubmit = () => {
     dispatch(action.clear_char())
     dispatch(action.clear_sku());
     dispatch(action.clear_quantity());
   };
 
-  const onPay = (itemList) => {
-    if (itemList.length !== 0 ){
-      const url_path = `http://localhost:5000/pos/pay`;
-      axios.post(url_path,{
-        itemList 
-      }).then( (response) => {
-        const { data } = response;
-        console.log(data);
-      },(error) => {
-      console.error(error);
-      });
-    } else {
-      console.log("No items in List.");
-    }
-  };
 
   const dispatch = useDispatch();
   const sku = useSelector(state => state.skuInput);
   const quantity = useSelector(state => state.productQuantity);
   const product = useSelector(state => state.findProduct);
   const itemList = useSelector(state => state.listItem);
+  const [payOpen, payModalOpen] = React.useState(false);
+  const [prodOpen, productModalOpen] = React.useState(false);
+
+  const payErrorOpen = () => {
+    payModalOpen(true);
+  };
+
+  const payErrorClose = () => {
+    payModalOpen(false);
+  };
+
+  const prodErrorClose = () => {
+    productModalOpen(false);
+  };
+
+  const payErrorModal = (
+    <div>
+      <h3>NOTICE</h3>
+      <p>No items in Item List</p>
+    </div>
+  );
+
+  const prodErrorModal = (
+    <div>
+      <h3>NOTICE</h3>
+      <p>Item Not Found</p>
+    </div>
+  );
+
+  const switchToPay = () => {
+    if(Object.keys(itemList).length !== 0){
+      console.log("Switch to Payment Page");
+      history.push("/pay");
+    } else {
+      console.log("Error Encountered");
+      payErrorOpen();
+    }
+  };
 
   return (
     <div>
-      <h1>Point-of-Sale System</h1>
       <Product />
       <input id="sku" 
       onInput={(e) => {skuInput( sku, e )}} 
@@ -109,6 +144,14 @@ function App(props) {
         <button onClick={() => {add_prod_q()}}>+</button>
         <button onClick={() => {sub_prod_q()}}>-</button>
       </h3>
+      <Modal
+        open={prodOpen}
+        onClose={prodErrorClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {prodErrorModal}
+      </Modal>
       <table>
         <tbody>
           <tr>
@@ -127,21 +170,29 @@ function App(props) {
             <td><button value="7" onClick={(e) => {onEnter(sku, e)}}>7</button></td>
             <td><button value="8" onClick={(e) => {onEnter(sku, e)}}>8</button></td>
             <td><button value="9" onClick={(e) => {onEnter(sku, e)}}>9</button></td>
-            <td><button>VOID</button></td>
+            <td><button onClick={() => dispatch(action.clearItem())}>VOID</button></td>
           </tr>
           <tr>
             <td><button>.</button></td>
             <td><button value="0" onClick={(e) => {onEnter(sku, e)}}>0</button></td>
             <td><button>#</button></td>
-            <td><button onClick={() => submit(product, quantity, itemList)}>ENTER</button></td>
+            <td><button onClick={() => prodOnSubmit(product, quantity, itemList)}>ENTER</button></td>
           </tr>
           <tr>
             <td colSpan="4">
-              <button onClick={props.onClick}>PAY</button>
+              <button onClick={switchToPay}>PAY</button>
             </td>
           </tr>
         </tbody>
       </table>
+      <Modal
+        open={payOpen}
+        onClose={payErrorClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {payErrorModal}
+      </Modal>
     </div>
   );
 }

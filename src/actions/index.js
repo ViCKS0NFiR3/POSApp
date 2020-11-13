@@ -1,3 +1,5 @@
+
+// PRODUCT REDUCER
 export const add_char = char => {
     return {
         type: 'CHAR_INPUT',
@@ -37,6 +39,7 @@ export const clear_sku = () => {
     };
 };
 
+// QUANTITY REDUCER
 export const add_quantity = () => {
     return {
         type: 'ADD_QUANTITY'
@@ -54,6 +57,8 @@ export const clear_quantity = () => {
         type: 'CLEAR_QUANTITY'
     };
 };
+
+// LIST ITEM REDUCER
 
 let listId = 0;
 
@@ -82,6 +87,12 @@ export const updateItem = (item_entry) => {
     };
 };
 
+export const clearItem = () => {
+    return { type: 'CLEAR_ITEM'}
+}
+
+// PAY VALUE REDUCER
+
 export const addPaymentValue = (value) => {
     return {
         type: 'ADD_VALUE',
@@ -97,8 +108,14 @@ export const setPaymentValue = (value) => {
     };
 };
 
-export const clearPaymentValue = () => {
+export const resetPaymentValue = () => {
     return {
         type: 'RESET_VALUE'
+    };
+};
+
+export const clearPaymentValue = () => {
+    return {
+        type: 'CLEAR_VALUE'
     };
 };

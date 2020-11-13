@@ -9,8 +9,8 @@ const listItem = (state=[], action) => {
                     sku: action.payload.sku
                 }
             ];
-        case 'VOID_ITEM':
-            return {};
+        case 'CLEAR_ITEM':
+            return [];
         
         case 'UPDATE_EXISTING':
             return state.map(item => 

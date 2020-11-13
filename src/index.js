@@ -8,29 +8,28 @@ import * as serviceWorker from './serviceWorker';
 import { createStore } from 'redux';
 import allReducer from './reducers';
 import { Provider } from 'react-redux';
-import {Redirect, BrowserHistory} from 'react-router';
-import {Router, Link, Switch, Route, useLocation } from 'react-router-dom';
+import {Router, Switch, Route } from 'react-router-dom';
 import history from './History';
 
 const store = createStore(allReducer);
 
 
 function PosApp() {
-  const switchToPay = () => history.push("/pay");
-  // FIX ERROR CANNOT READ PROPERTY "PUSH OF UNDEFINED"
-
   return (
     <Provider store={store}>
     <React.StrictMode>
-      <App store={store} onClick={() => switchToPay()}/>
+      <h1>Point-of-Sale System</h1>
       <Router history={history}> 
         <Switch>
-          <Route exact path="/" component={ItemList}/>
-          <Route path="/pay" render={(props) => (
+          <Route exact path="/" render={(props) => (
+            <App {...props} store={store}/>
+          )} />
+          <Route exact path="/pay" render={(props) => (
             <PaymentHandler {...props} store={store}/>
           )} />
         </Switch>
       </Router>
+      <ItemList store={store}/>
     </React.StrictMode>
   </Provider>
   );
